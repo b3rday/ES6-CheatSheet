@@ -19,6 +19,7 @@
 - [Promises](#promises)
 - [Generators](#generators)
 - [Async Await](#async-await)
+- [License](#license)
 
 ## var versus let / const
 
@@ -89,7 +90,7 @@ console.log(food); // Reference Error
 ```javascript
 {
     let food = 'Meow Mix';
-}
+};
 
 console.log(food); // Reference Error
 ```
@@ -405,12 +406,17 @@ let api = {
 };
 
 export default api;
+
+/*
+ * 与以下的语句是对等的:
+ * export { api as default };
+ */
 ```
 
 > **最佳实践**：总是在模块的 **最后** 使用 `export default` 方法。
 它让模块的出口更清晰明了，节省了阅读整个模块来寻找出口的时间。
 更多的是，在大量CommonJS模块中，通用的习惯是设置一个出口值或者出口对象。
-最受这个规则，可以让我们的代码更易读，且更方便的联合使用CommonJS和ES6模块。
+坚持这个规则，可以让我们的代码更易读，且更方便的联合使用CommonJS和ES6模块。
 
 ### Importing in ES6
 
@@ -653,13 +659,13 @@ class Personal extends Person {
 
 ## Symbols
 
-符号（Symbols）在ES6版本之前就已经存在了，但现在我们拥有一个公共的接口来直接使用它们。
-Symbols对象是一旦创建就不可以被更改的（immutable）而且能被用做hash数据类型中的键。
+Symbols在ES6版本之前就已经存在了，但现在我们拥有一个公共的接口来直接使用它们。
+Symbols是不可更改的（immutable）并且唯一的（unique），它可用作任何hash数据类型中的键。
 
 ### Symbol( )
-调用 `Symbol()` 或者 `Symbol(描述文本)` 会创建一个唯一的、在全局中不可以访问的符号对象。
+调用 `Symbol()` 或者 `Symbol(描述文本)` 会创建一个唯一的、在全局中不可以访问的Symbol对象。
 一个 `Symbol()` 的应用场景是：在自己的项目中使用第三方代码库，且你需要给他们的对象或者命名空间打补丁代码，又不想改动或升级第三方原有代码的时候。
-举个例子，如果你想给 `React.Component` 这个类添加一个 `refreshComponent` 方法，但又确定不了这个方法会不会在下个版本中加入，你可以这么做：
+例如，如果你想给 `React.Component` 这个类添加一个 `refreshComponent` 方法，但又确定不了这个方法会不会在下个版本中加入，你可以这么做：
 
 ```javascript
 const refreshComponent = Symbol();
@@ -672,7 +678,7 @@ React.Component.prototype[refreshComponent] = () => {
 ### Symbol.for(key)
 
 使用 `Symbol.for(key)` 也是会创建一个不可改变的Symbol对象，但区别于上面的创建方法，这个对象是在全局中可以被访问到的。
-调用两次 `Symbol.for(key)` 会返回相同的Symbol实例。
+两次相同的 `Symbol.for(key)` 调用会返回相同的Symbol实例。
 
 **提示**：这并不同于 `Symbol(description)`。
 
@@ -682,9 +688,9 @@ Symbol.for('foo') === Symbol('foo') // false
 Symbol.for('foo') === Symbol.for('foo') // true
 ```
 
-一个Symbols常用的使用场景，是需要使用特别 `Symbol.for(key)` 方法来实现代码间的协作。
-这能让你在你的代码中，查找包含已知的接口的第三方代码中Symbol成员。（译者：这句话好难翻。。。原文：This can be
-achieved by having your code look for a Symbol member on object arguments from third parties that contain some known interface. ）举个例子：
+Symbols常用的一个使用场景，尤其是使用 `Symbol.for(key)` 方法，是用于实现代码间的互操作。
+在你的代码中，通过在包含一些已知接口的第三方库的对象参数中查找Symbol成员，你可以实现这种互操作。
+例如：
 
 ```javascript
 function reader(obj) {
@@ -711,13 +717,14 @@ class SomeReadableType {
 }
 ```
 
-> **注意**：`Symbol.iterable` 在ES6中像其他可枚举的对象，如数组，字符串，generators一样，当这个方法被调用时会激活一个枚举器并返回一个对象。
+> **注意**：关于Symbol互操作的使用，一个值得一提的例子是`Symbol.iterable` 。`Symbol.iterable`存在ES6的所有可枚举对象中：数组（Arrays）、
+> 字符串（strings）、生成器（Generators）等等。当它作为一个方法被调用时，它将会返回一个带有枚举接口的对象。
 
 <sup>[(回到目录)](#table-of-contents)</sup>
 
 ## Maps
 
-**Maps** 是一个Javascript中很重要（迫切需要）的数据结构。
+**Maps** 是一个JavaScript中很重要（迫切需要）的数据结构。
 在ES6之前，我们创建一个 **hash** 通常是使用一个对象：
 
 ```javascript
@@ -816,7 +823,7 @@ class Person {
 > Reflect.ownKeys(person); // []
 ```
 
-一个使用WeakMaps存储数据更实际的例子，就是有关于一个DOM元素和对该DOM元素（有污染）地操作：
+一个使用WeakMaps存储数据更实际的例子，是存储与DOM元素相关联的数据，而这不会对DOM元素本身产生污染：
 
 ```javascript
 let map = new WeakMap();
@@ -835,16 +842,16 @@ el = null;
 value = map.get(el); // undefined
 ```
 
-上面的例子中，一个对象被垃圾回收期给销毁了，WeakMaps会自动的把自己内部所对应的键值对数据同时销毁。
+上面的例子中，一旦对象被垃圾回收器给销毁了，WeakMaps会自动的把这个对象所对应的键值对数据同时销毁。
 
-> **提示**：结合这个例子，再考虑下jQuery是如何实现缓存带有引用的DOM元素这个功能的，使用了WeakMaps的话，当被缓存的DOM元素被移除的时，jQuery可以自动释放相应元素的内存。
-通常情况下，在涉及DOM元素存储和缓存的情况下，使用WeakMaps是非常适合的。
+> **提示**：结合这个例子，再考虑下jQuery是如何实现缓存带有引用的DOM元素这个功能的。使用WeakMaps的话，当被缓存的DOM元素被移除的时，jQuery可以自动释放相应元素的内存。
+通常情况下，在涉及DOM元素存储和缓存的情况下，使用WeakMaps是非常有效的。
 
 <sup>[(回到目录)](#table-of-contents)</sup>
 
 ## Promises
 
-Promises让我们让我们多缩进难看的代码（回调地狱）：
+Promises让我们把多缩进难看的代码（回调地狱）：
 
 ```javascript
 func1(function (value1) {
@@ -883,40 +890,51 @@ new Promise((resolve, reject) =>
 
 这里有两个处理函数，**resolve**（当Promise执行成功完毕时调用的回调函数） 和 **reject** （当Promise执行不接受时调用的回调函数）
 
-> **Promises的好处**：大量嵌套错误回调函数会使代码变得难以阅读理解。
-使用了Promises，我们可以让我们代码变得更易读，组织起来更合理。
-此外，Promise处理后的值，无论是解决还是拒绝的结果值，都是不可改变的。
+> **Promises的好处**：大量嵌套错误处理回调函数会使代码变得难以阅读理解。
+使用Promises，我们可以通过清晰的路径将错误事件让上传递，并且适当地处理它们。
+此外，Promise处理后的值，无论是解决（resolved）还是拒绝（rejected）的结果值，都是不可改变的。
 
 下面是一些使用Promises的实际例子：
 
 ```javascript
-var fetchJSON = function(url) {
-    return new Promise((resolve, reject) => {
-        $.getJSON(url)
-            .done((json) => resolve(json))
-            .fail((xhr, status, err) => reject(status + err.message));
-    });
-};
+var request = require('request');
+
+return new Promise((resolve, reject) => {
+  request.get(url, (error, response, body) => {
+    if (body) {
+        resolve(JSON.parse(body));
+      } else {
+        resolve({});
+      }
+  });
+});
 ```
 
-我们还可以使用 `Promise.all()` 来异步的 **并行** 处理一个数组的数据。
+我们还可以使用 `Promise.all()` 来 **并行化** 的处理一组异步的操作。
 
 ```javascript
-var urls = [
-    'http://www.api.com/items/1234',
-    'http://www.api.com/items/4567'
+let urls = [
+  '/api/commits',
+  '/api/issues/opened',
+  '/api/issues/assigned',
+  '/api/issues/completed',
+  '/api/issues/comments',
+  '/api/pullrequests'
 ];
 
-var urlPromises = urls.map(fetchJSON);
+let promises = urls.map((url) => {
+  return new Promise((resolve, reject) => {
+    $.ajax({ url: url })
+      .done((data) => {
+        resolve(data);
+      });
+  });
+});
 
-Promise.all(urlPromises)
-    .then(function (results) {
-        results.forEach(function (data) {
-        });
-    })
-    .catch(function (err) {
-        console.log('Failed: ', err);
-    });
+Promise.all(promises)
+  .then((results) => {
+    // Do something with results of all our promises
+ });
 ```
 
 <sup>[(回到目录)](#table-of-contents)</sup>
@@ -937,11 +955,10 @@ function* sillyGenerator() {
 }
 
 var generator = sillyGenerator();
-var value = generator.next();
-> console.log(value); // { value: 1, done: false }
-> console.log(value); // { value: 2, done: false }
-> console.log(value); // { value: 3, done: false }
-> console.log(value); // { value: 4, done: false }
+> console.log(generator.next()); // { value: 1, done: false }
+> console.log(generator.next()); // { value: 2, done: false }
+> console.log(generator.next()); // { value: 3, done: false }
+> console.log(generator.next()); // { value: 4, done: false }
 ```
 
 就像上面的例子，当[next](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator/next)运行时，它会把我们的generator向前“推动”，同时执行新的表达式。
@@ -1038,5 +1055,31 @@ main();
 
 它们看上去和Generators很像。我（作者）强烈推荐使用 `async await` 来替代Generators + Promises的写法。
 [这里](http://masnun.com/2015/11/11/using-es7-asyncawait-today-with-babel.html)是个很好的学习资源，让我们学习和使用这项ES7中的新功能。
+
+<sup>[(回到目录)](#table-of-contents)</sup>
+
+## License
+
+The MIT License (MIT)
+
+Copyright (c) 2015 David Leonard
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 <sup>[(回到目录)](#table-of-contents)</sup>
